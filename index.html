@@ -318,6 +318,19 @@
     margin-bottom: 12px;
   }
   .thanks p { color: var(--text-muted); }
+  .thanks-logo {
+    display: block;
+    width: 180px;
+    max-width: 60%;
+    height: auto;
+    margin: 40px auto 0;
+    animation: float 3.5s ease-in-out infinite;
+    filter: drop-shadow(0 12px 30px rgba(232, 181, 71, 0.2));
+  }
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50%      { transform: translateY(-10px); }
+  }
 </style>
 </head>
 <body>
@@ -392,6 +405,7 @@
     <div class="check">✓</div>
     <h2>Grazie!</h2>
     <p>Ci vediamo al Gran Galanzio!</p>
+    <img src="SB_3D.png" alt="Sporting Bisanzio" class="thanks-logo">
   </div>
 
 </div>
