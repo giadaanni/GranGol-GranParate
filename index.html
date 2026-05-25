@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sporting Bisanzio — Vota il Miglior Gol e la Miglior Parata</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+  /* ===========================================
+     PALETTE — coerente con shared.css del sito
+     =========================================== */
+  :root {
+    --granata: #7A1F2B;
+    --granata-dark: #4A1018;
+    --granata-deep: #2A0810;
+    --oro: #E8B547;
+    --oro-light: #F5D27A;
+    --oro-dim: #7a5e20;
+
+    --bg: #0B0608;
+    --bg-panel: #15090C;
+    --bg-panel-light: #1E0E12;
+
+    --text: #F5E6C8;
+    --text-muted: #8B7560;
+    --cream: #f2e8d5;
+
+    --border: rgba(232, 181, 71, 0.25);
+    --border-active: rgba(232, 181, 71, 0.7);
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    line-height: 1.5;
+  }
+
+  /* Decoro sfondo: sfumatura granata sottile in alto */
+  body::before {
+    content: "";
+    position: fixed;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 80% 50% at 50% 0%, rgba(122, 31, 43, 0.35), transparent 70%),
+      radial-gradient(ellipse 60% 40% at 50% 100%, rgba(74, 16, 24, 0.25), transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 20px 80px;
+  }
+
+  /* ========== Header ========== */
+  header {
+    text-align: center;
+    margin-bottom: 48px;
+    padding-bottom: 32px;
+    border-bottom: 1px solid var(--border);
+  }
+  header .badge {
+    display: inline-block;
+    font-size: 12px;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    color: var(--oro);
+    margin-bottom: 16px;
+    font-weight: 600;
+  }
+  header h1 {
+    font-size: clamp(28px, 5vw, 44px);
+    font-weight: 800;
+    letter-spacing: -0.02em;
+    color: var(--cream);
+    margin-bottom: 16px;
+    line-height: 1.15;
+  }
+  header h1 .accent { color: var(--oro); }
+  header p {
+    color: var(--text-muted);
+    max-width: 600px;
+    margin: 0 auto;
+    font-size: 15px;
+  }
+
+  /* ========== Card sezione ========== */
+  .section {
+    background: var(--bg-panel);
+    border: 1px solid var(--border);
+    border-radius: 14px;
+    padding: 28px;
+    margin-bottom: 32px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.4);
+  }
+  .section h2 {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--oro-light);
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .section h2 .num {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    background: var(--granata);
+    color: var(--cream);
+    font-size: 14px;
+    font-weight: 700;
+    border: 1px solid var(--border-active);
+  }
+  .section .sub {
+    color: var(--text-muted);
+    font-size: 13px;
+    margin-bottom: 20px;
+    margin-left: 44px;
+  }
+
+  /* ========== Video YouTube responsive ========== */
+  .video-wrap {
+    position: relative;
+    width: 100%;
+    aspect-ratio: 16 / 9;
+    border-radius: 10px;
+    overflow: hidden;
+    border: 1px solid var(--border);
+    margin-bottom: 24px;
+    background: #000;
+  }
+  .video-wrap iframe {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  /* ========== Form generale ========== */
+  .field {
+    margin-bottom: 16px;
+  }
+  .field label {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--oro-light);
+    margin-bottom: 6px;
+    letter-spacing: 0.3px;
+  }
+  .field input[type="text"],
+  .field select {
+    width: 100%;
+    background: var(--bg-panel-light);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 14px;
+    font-family: inherit;
+    font-size: 15px;
+    transition: border-color .2s, background .2s;
+    appearance: none;
+  }
+  .field input[type="text"]:focus,
+  .field select:focus {
+    outline: none;
+    border-color: var(--border-active);
+    background: var(--granata-deep);
+  }
+  /* freccia custom per select su sfondo scuro */
+  .field select {
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 8' fill='none'><path d='M1 1l5 5 5-5' stroke='%23E8B547' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'/></svg>");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 12px;
+    padding-right: 36px;
+  }
+
+  /* Dati personali in due colonne su desktop */
+  .name-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+  @media (max-width: 540px) {
+    .name-row { grid-template-columns: 1fr; }
+  }
+
+  /* ========== Ranking rows ========== */
+  .rank-row {
+    display: grid;
+    grid-template-columns: 110px 1fr;
+    gap: 14px;
+    align-items: center;
+    margin-bottom: 12px;
+  }
+  .rank-label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .rank-label .position {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--granata-dark);
+    color: var(--oro);
+    font-size: 13px;
+    font-weight: 700;
+    border: 1px solid var(--border);
+  }
+  .rank-label .points {
+    font-size: 11px;
+    color: var(--text-muted);
+    font-weight: 500;
+  }
+  @media (max-width: 540px) {
+    .rank-row { grid-template-columns: 1fr; gap: 6px; }
+  }
+
+  /* ========== Bottone submit ========== */
+  .submit-wrap {
+    text-align: center;
+    margin-top: 8px;
+  }
+  button.submit {
+    background: linear-gradient(135deg, var(--oro) 0%, var(--oro-light) 100%);
+    color: var(--granata-deep);
+    border: none;
+    padding: 16px 48px;
+    font-family: inherit;
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    border-radius: 10px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: transform .15s, box-shadow .15s, opacity .15s;
+    box-shadow: 0 6px 20px rgba(232, 181, 71, 0.25);
+  }
+  button.submit:hover:not(:disabled) {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 30px rgba(232, 181, 71, 0.4);
+  }
+  button.submit:active:not(:disabled) { transform: translateY(0); }
+  button.submit:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  /* ========== Messaggi stato ========== */
+  .status {
+    margin-top: 20px;
+    padding: 16px 20px;
+    border-radius: 10px;
+    font-size: 14px;
+    text-align: center;
+    display: none;
+  }
+  .status.show { display: block; }
+  .status.success {
+    background: rgba(232, 181, 71, 0.1);
+    border: 1px solid var(--border-active);
+    color: var(--oro-light);
+  }
+  .status.error {
+    background: rgba(122, 31, 43, 0.3);
+    border: 1px solid var(--granata);
+    color: var(--cream);
+  }
+
+  /* Errore inline su singolo dropdown */
+  .field.error select,
+  .field.error input { border-color: #d96a6a; }
+
+  /* Loader inline nel bottone */
+  .spinner {
+    display: inline-block;
+    width: 14px;
+    height: 14px;
+    border: 2px solid rgba(42, 8, 16, 0.3);
+    border-top-color: var(--granata-deep);
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+    vertical-align: middle;
+    margin-right: 8px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* Schermata di ringraziamento finale */
+  .thanks {
+    display: none;
+    text-align: center;
+    padding: 60px 30px;
+  }
+  .thanks.show { display: block; }
+  .thanks .check {
+    font-size: 60px;
+    color: var(--oro);
+    margin-bottom: 20px;
+  }
+  .thanks h2 {
+    font-size: 28px;
+    color: var(--cream);
+    margin-bottom: 12px;
+  }
+  .thanks p { color: var(--text-muted); }
+</style>
+</head>
+<body>
+
+<div class="container" id="mainContainer">
+
+  <header>
+    <div class="badge">Sporting Bisanzio</div>
+    <h1>Vota il <span class="accent">Miglior Gol</span><br>e la <span class="accent">Miglior Parata</span></h1>
+    <p>Guarda i due video qui sotto, scegli le tue 5 clip preferite per categoria e ordinale dalla migliore alla quinta. Buona visione!</p>
+  </header>
+
+  <form id="voteForm" novalidate>
+
+    <!-- DATI PERSONALI -->
+    <div class="section">
+      <h2><span class="num">1</span>I tuoi dati</h2>
+      <div class="sub">Servono per registrare il tuo voto (un voto per persona).</div>
+      <div class="name-row">
+        <div class="field">
+          <label for="firstName">Nome</label>
+          <input type="text" id="firstName" name="firstName" required autocomplete="given-name">
+        </div>
+        <div class="field">
+          <label for="lastName">Cognome</label>
+          <input type="text" id="lastName" name="lastName" required autocomplete="family-name">
+        </div>
+      </div>
+    </div>
+
+    <!-- SEZIONE GOL -->
+    <div class="section">
+      <h2><span class="num">2</span>Miglior Gol</h2>
+      <div class="sub">Guarda il video e ordina i 5 gol che ti sono piaciuti di più.</div>
+
+      <div class="video-wrap">
+        <iframe id="goalVideo"
+          src=""
+          title="Compilation Gol"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+      </div>
+
+      <div id="goalRanking"></div>
+    </div>
+
+    <!-- SEZIONE PARATE -->
+    <div class="section">
+      <h2><span class="num">3</span>Miglior Parata</h2>
+      <div class="sub">Guarda il video e ordina le 5 parate che ti sono piaciute di più.</div>
+
+      <div class="video-wrap">
+        <iframe id="saveVideo"
+          src=""
+          title="Compilation Parate"
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          allowfullscreen></iframe>
+      </div>
+
+      <div id="saveRanking"></div>
+    </div>
+
+    <!-- SUBMIT -->
+    <div class="submit-wrap">
+      <button type="submit" class="submit" id="submitBtn">Invia il mio voto</button>
+      <div class="status" id="statusMsg"></div>
+    </div>
+
+  </form>
+
+  <!-- Schermata di ringraziamento (mostrata dopo submit ok) -->
+  <div class="thanks" id="thanksScreen">
+    <div class="check">✓</div>
+    <h2>Voto registrato!</h2>
+    <p>Grazie per aver votato. A presto allo Sporting Bisanzio.</p>
+  </div>
+
+</div>
+
+<script>
+  // ============================================================
+  // CONFIGURAZIONE — da personalizzare prima di pubblicare
+  // ============================================================
+
+  // 1) URL del tuo Google Apps Script (Web App).
+  //    Lo otterrai dopo aver creato e distribuito lo script (istruzioni in fondo al README).
+  const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbywq4NzLJ-uqUcvQrahLH1b84T5_mt3WPjmRuUi33TydPTdrgC1DS5DqD3RRZomAPeW7A/exec";
+
+  // 2) ID dei due video YouTube (la parte dopo "v=" nell'URL).
+  //    Esempio: per https://www.youtube.com/watch?v=dQw4w9WgXcQ l'ID è "dQw4w9WgXcQ"
+  const GOAL_VIDEO_ID = "uH-u-xptkwE";
+  const SAVE_VIDEO_ID = "ydHUvbwxq08";
+
+  // 3) Numero di codici per categoria (max 25 come da specifica)
+  const NUM_GOALS = 25;
+  const NUM_SAVES = 25;
+
+  // ============================================================
+  // Logica — non serve modificare niente sotto questa riga
+  // ============================================================
+
+  // Punti per posizione (1°, 2°, 3°, 4°, 5°)
+  const POINTS = [5, 2, 1, 0.5, 0.5];
+  const POSITION_LABELS = ["1°", "2°", "3°", "4°", "5°"];
+
+  // Genera codici tipo G01A...G25A oppure P01A...P25A
+  function makeCodes(prefix, n) {
+    const list = [];
+    for (let i = 1; i <= n; i++) {
+      list.push(prefix + String(i).padStart(2, "0") + "A");
+    }
+    return list;
+  }
+  const goalCodes = makeCodes("G", NUM_GOALS);
+  const saveCodes = makeCodes("P", NUM_SAVES);
+
+  // Imposta i video
+  document.getElementById("goalVideo").src =
+    "https://www.youtube.com/embed/" + GOAL_VIDEO_ID + "?rel=0";
+  document.getElementById("saveVideo").src =
+    "https://www.youtube.com/embed/" + SAVE_VIDEO_ID + "?rel=0";
+
+  // Costruisce dinamicamente le 5 righe di ranking per una categoria
+  function buildRanking(containerId, codes, namePrefix) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    for (let i = 0; i < 5; i++) {
+      const row = document.createElement("div");
+      row.className = "rank-row";
+
+      const labelDiv = document.createElement("div");
+      labelDiv.className = "rank-label";
+      labelDiv.innerHTML =
+        '<span class="position">' + POSITION_LABELS[i] + '</span>' +
+        '<span class="points">' + POINTS[i] + ' pt</span>';
+
+      const fieldDiv = document.createElement("div");
+      fieldDiv.className = "field";
+      const select = document.createElement("select");
+      select.name = namePrefix + "_" + (i + 1);
+      select.dataset.group = namePrefix;
+      select.required = true;
+
+      const placeholder = document.createElement("option");
+      placeholder.value = "";
+      placeholder.textContent = "— Scegli un codice —";
+      placeholder.disabled = true;
+      placeholder.selected = true;
+      select.appendChild(placeholder);
+
+      codes.forEach(code => {
+        const opt = document.createElement("option");
+        opt.value = code;
+        opt.textContent = code;
+        select.appendChild(opt);
+      });
+
+      select.addEventListener("change", () => refreshGroup(namePrefix));
+
+      fieldDiv.appendChild(select);
+      row.appendChild(labelDiv);
+      row.appendChild(fieldDiv);
+      container.appendChild(row);
+    }
+  }
+
+  // Aggiorna i select di un gruppo: codici già scelti negli altri select diventano disabled
+  function refreshGroup(group) {
+    const selects = document.querySelectorAll('select[data-group="' + group + '"]');
+    const chosen = new Set();
+    selects.forEach(s => { if (s.value) chosen.add(s.value); });
+
+    selects.forEach(s => {
+      const currentValue = s.value;
+      Array.from(s.options).forEach(opt => {
+        if (!opt.value) return; // placeholder
+        // Disabilita se è già scelto altrove (ma non se è il valore attuale di QUESTO select)
+        opt.disabled = chosen.has(opt.value) && opt.value !== currentValue;
+      });
+    });
+  }
+
+  buildRanking("goalRanking", goalCodes, "goal");
+  buildRanking("saveRanking", saveCodes, "save");
+
+  // Gestione invio form
+  const form = document.getElementById("voteForm");
+  const statusMsg = document.getElementById("statusMsg");
+  const submitBtn = document.getElementById("submitBtn");
+
+  function showStatus(text, type) {
+    statusMsg.textContent = text;
+    statusMsg.className = "status show " + type;
+  }
+  function clearStatus() {
+    statusMsg.className = "status";
+    statusMsg.textContent = "";
+  }
+
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
+    clearStatus();
+
+    // Validazione
+    const firstName = document.getElementById("firstName").value.trim();
+    const lastName = document.getElementById("lastName").value.trim();
+
+    if (!firstName || !lastName) {
+      showStatus("Inserisci nome e cognome.", "error");
+      return;
+    }
+
+    const goalValues = [];
+    const saveValues = [];
+    document.querySelectorAll('select[data-group="goal"]').forEach(s => goalValues.push(s.value));
+    document.querySelectorAll('select[data-group="save"]').forEach(s => saveValues.push(s.value));
+
+    if (goalValues.some(v => !v) || saveValues.some(v => !v)) {
+      showStatus("Devi scegliere tutte e 5 le posizioni in entrambe le classifiche.", "error");
+      return;
+    }
+
+    // Costruisco il payload
+    const payload = {
+      firstName,
+      lastName,
+      goals: goalValues,   // [1°,2°,3°,4°,5°]
+      saves: saveValues
+    };
+
+    // Invio
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = '<span class="spinner"></span>Invio in corso...';
+
+    try {
+      // Uso "text/plain" per evitare la preflight CORS che Apps Script non gestisce bene
+      const res = await fetch(APPS_SCRIPT_URL, {
+        method: "POST",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+
+      if (data.status === "ok") {
+        // Mostra schermata di ringraziamento, nascondi form
+        form.style.display = "none";
+        document.getElementById("thanksScreen").classList.add("show");
+        window.scrollTo({ top: 0, behavior: "smooth" });
+      } else if (data.status === "duplicate") {
+        showStatus("Risulta già un voto con questo Nome e Cognome. Hai già votato?", "error");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Invia il mio voto";
+      } else {
+        showStatus("Errore: " + (data.message || "riprova più tardi."), "error");
+        submitBtn.disabled = false;
+        submitBtn.textContent = "Invia il mio voto";
+      }
+    } catch (err) {
+      showStatus("Errore di connessione. Controlla la rete e riprova.", "error");
+      submitBtn.disabled = false;
+      submitBtn.textContent = "Invia il mio voto";
+    }
+  });
+</script>
+
+</body>
+</html>
