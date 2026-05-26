@@ -299,7 +299,25 @@
   .timestamps .ts-item {
     display: flex;
     justify-content: space-between;
+    align-items: center;
     color: var(--text);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 6px 10px;
+    font-family: inherit;
+    font-size: 12px;
+    cursor: pointer;
+    transition: background .15s, border-color .15s, transform .1s;
+    text-align: left;
+  }
+  .timestamps .ts-item:hover {
+    background: var(--granata-deep);
+    border-color: var(--border-active);
+    transform: translateY(-1px);
+  }
+  .timestamps .ts-item:active {
+    transform: translateY(0);
   }
   .timestamps .ts-item .code {
     color: var(--oro);
@@ -685,7 +703,7 @@
       <h2><span class="num">1</span>Gran Gol</h2>
       <div class="sub">Guarda il video e ordina i 5 gol che ti sono piaciuti di più.</div>
 
-      <div class="video-wrap">
+      <div class="video-wrap" id="goalVideoWrap">
         <iframe id="goalVideo"
           src=""
           title="Compilation Gol"
@@ -694,16 +712,16 @@
       </div>
       <div class="video-hint">Doppio click sul video per metterlo a schermo intero</div>
 
-      <div class="timestamps" id="goalTimestamps">
-        <strong>Codici nel video</strong>
-        <div class="ts-grid" id="goalTsGrid"></div>
-      </div>
-
       <div id="goalRanking"></div>
 
       <div class="progress" id="goalProgress">
         <span class="label">Gol selezionati</span>
         <span class="count"><span id="goalCount">0</span>/5</span>
+      </div>
+
+      <div class="timestamps" id="goalTimestamps">
+        <strong>Codici nel video — clicca per saltare al gol</strong>
+        <div class="ts-grid" id="goalTsGrid"></div>
       </div>
     </div>
 
@@ -712,7 +730,7 @@
       <h2><span class="num">2</span>Gran Parata</h2>
       <div class="sub">Guarda il video e ordina le 3 parate che ti sono piaciute di più.</div>
 
-      <div class="video-wrap">
+      <div class="video-wrap" id="saveVideoWrap">
         <iframe id="saveVideo"
           src=""
           title="Compilation Parate"
@@ -721,16 +739,16 @@
       </div>
       <div class="video-hint">Doppio click sul video per metterlo a schermo intero</div>
 
-      <div class="timestamps" id="saveTimestamps">
-        <strong>Codici nel video</strong>
-        <div class="ts-grid" id="saveTsGrid"></div>
-      </div>
-
       <div id="saveRanking"></div>
 
       <div class="progress" id="saveProgress">
         <span class="label">Parate selezionate</span>
         <span class="count"><span id="saveCount">0</span>/3</span>
+      </div>
+
+      <div class="timestamps" id="saveTimestamps">
+        <strong>Codici nel video — clicca per saltare alla parata</strong>
+        <div class="ts-grid" id="saveTsGrid"></div>
       </div>
     </div>
 
@@ -822,12 +840,45 @@
   const saveCodes = makeCodes("P", NUM_SAVES);
 
   // ============================================================
-  // Video YouTube (nocookie)
+  // Video YouTube — uso youtube.com per abilitare IFrame API
+  // (i timestamp cliccabili richiedono questa modalità)
   // ============================================================
   document.getElementById("goalVideo").src =
-    "https://www.youtube-nocookie.com/embed/" + GOAL_VIDEO_ID + "?rel=0";
+    "https://www.youtube.com/embed/" + GOAL_VIDEO_ID + "?rel=0&enablejsapi=1";
   document.getElementById("saveVideo").src =
-    "https://www.youtube-nocookie.com/embed/" + SAVE_VIDEO_ID + "?rel=0";
+    "https://www.youtube.com/embed/" + SAVE_VIDEO_ID + "?rel=0&enablejsapi=1";
+
+  // Caricamento YouTube IFrame API (asincrono)
+  let goalPlayer = null;
+  let savePlayer = null;
+  let ytApiReady = false;
+
+  (function loadYouTubeAPI() {
+    const tag = document.createElement("script");
+    tag.src = "https://www.youtube.com/iframe_api";
+    document.head.appendChild(tag);
+  })();
+
+  // Callback globale chiamata dall'API YouTube quando è pronta
+  window.onYouTubeIframeAPIReady = function() {
+    ytApiReady = true;
+    goalPlayer = new YT.Player("goalVideo");
+    savePlayer = new YT.Player("saveVideo");
+  };
+
+  // Salta a un timestamp e fa partire il video
+  function jumpToTime(player, seconds, videoWrapId) {
+    if (player && typeof player.seekTo === "function") {
+      player.seekTo(seconds, true);
+      // Provo a far partire automaticamente la riproduzione
+      try { player.playVideo(); } catch(e) {}
+    }
+    // Scroll al video per chi clicca da lontano (dalla legenda in fondo)
+    const wrap = document.getElementById(videoWrapId);
+    if (wrap) {
+      wrap.scrollIntoView({ behavior: "smooth", block: "center" });
+    }
+  }
 
   // ============================================================
   // Legenda timestamp
@@ -838,22 +889,26 @@
     const s = seconds % 60;
     return m + ":" + String(s).padStart(2, "0");
   }
-  function buildTimestamps(codes, timestampMap, gridId, containerId) {
+  function buildTimestamps(codes, timestampMap, gridId, containerId, playerGetter, videoWrapId) {
     const hasAny = Object.values(timestampMap).some(v => v !== null && v !== undefined);
     if (!hasAny) return;
     const grid = document.getElementById(gridId);
     codes.forEach(code => {
       const t = timestampMap[code];
       if (t === undefined || t === null) return;
-      const item = document.createElement("div");
+      const item = document.createElement("button");
+      item.type = "button";
       item.className = "ts-item";
       item.innerHTML = '<span class="code">' + code + '</span><span>' + formatTime(t) + '</span>';
+      item.addEventListener("click", () => {
+        jumpToTime(playerGetter(), t, videoWrapId);
+      });
       grid.appendChild(item);
     });
     document.getElementById(containerId).classList.add("show");
   }
-  buildTimestamps(goalCodes, GOAL_TIMESTAMPS, "goalTsGrid", "goalTimestamps");
-  buildTimestamps(saveCodes, SAVE_TIMESTAMPS, "saveTsGrid", "saveTimestamps");
+  buildTimestamps(goalCodes, GOAL_TIMESTAMPS, "goalTsGrid", "goalTimestamps", () => goalPlayer, "goalVideoWrap");
+  buildTimestamps(saveCodes, SAVE_TIMESTAMPS, "saveTsGrid", "saveTimestamps", () => savePlayer, "saveVideoWrap");
 
   // ============================================================
   // Costruzione dropdown
