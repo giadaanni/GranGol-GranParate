@@ -782,23 +782,23 @@
   // CONFIGURAZIONE
   // ============================================================
   const APPS_SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwsDzGL1SaW9ZijnU4cixFMni3uO7SfjkxF0JaS8877YMI4bPFKMikwUP_GmooXS5BeRA/exec";
-  const GOAL_VIDEO_ID = "uH-u-xptkwE";
-  const SAVE_VIDEO_ID = "ydHUvbwxq08";
+  const GOAL_VIDEO_ID = "THJJoSB8enw";
+  const SAVE_VIDEO_ID = "FQ7M5NkEgOU";
   const NUM_GOALS = 25;
   const NUM_SAVES = 10;
 
-  // Timestamp per ogni codice. Compila i secondi (es. 12 → 0:12, 75 → 1:15).
-  // Lascia null se non lo sai: quel codice non avrà il link al tempo.
-  // Se TUTTI sono null, la legenda timestamp non viene mostrata.
-  // Esempio: GOAL_TIMESTAMPS["G01A"] = 0; GOAL_TIMESTAMPS["G02A"] = 18;
+  // Timestamp di inizio di ogni clip nei video (estratti dagli XML di sequenza).
+  // Cliccando un codice nella legenda non succede nulla: i valori servono per la legenda visiva.
   const GOAL_TIMESTAMPS = {
-    // "G01A": 0,
-    // "G02A": 15,
-    // ...
+    "G01A": 5,   "G02A": 36,  "G03A": 49,  "G04A": 65,  "G05A": 89,
+    "G06A": 107, "G07A": 130, "G08A": 147, "G09A": 159, "G10A": 188,
+    "G11A": 207, "G12A": 224, "G13A": 245, "G14A": 259, "G15A": 274,
+    "G16A": 291, "G17A": 309, "G18A": 328, "G19A": 347, "G20A": 374,
+    "G21A": 386, "G22A": 401, "G23A": 422, "G24A": 434, "G25A": 448
   };
   const SAVE_TIMESTAMPS = {
-    // "P01A": 0,
-    // ...
+    "P01A": 5,   "P02A": 11,  "P03A": 19,  "P04A": 27,  "P05A": 38,
+    "P06A": 46,  "P07A": 53,  "P08A": 68,  "P09A": 83,  "P10A": 94
   };
 
   // ============================================================
