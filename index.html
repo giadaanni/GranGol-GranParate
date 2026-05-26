@@ -69,12 +69,59 @@
     padding-bottom: 32px;
     border-bottom: 1px solid var(--border);
   }
-  header .logo {
-    display: block;
+  header .logo-wrap {
+    position: relative;
+    display: inline-block;
     margin: 0 auto 24px;
     max-width: 320px;
     width: 70%;
+    overflow: hidden;
+    /* Maschera che evita che il glint esca dal bounding box del logo */
+    -webkit-mask-image:
+      linear-gradient(black, black);
+    mask-image:
+      linear-gradient(black, black);
+  }
+  header .logo {
+    display: block;
+    width: 100%;
     height: auto;
+    position: relative;
+    z-index: 1;
+  }
+  /* Glint: lama diagonale che passa SOPRA al logo */
+  header .logo-glint {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
+    pointer-events: none;
+    background-image: linear-gradient(
+      115deg,
+      transparent 0%,
+      transparent 38%,
+      rgba(255, 240, 200, 0.0) 44%,
+      rgba(255, 246, 220, 0.35) 48%,
+      rgba(255, 252, 240, 0.7) 50%,
+      rgba(255, 246, 220, 0.35) 52%,
+      rgba(255, 240, 200, 0.0) 56%,
+      transparent 62%,
+      transparent 100%
+    );
+    background-size: 350% 100%;
+    background-repeat: no-repeat;
+    background-position: 200% 0;
+    /* Overlay: la lama dorata interagisce con i colori dell'immagine
+       sotto, esaltando i riflessi metallici invece di coprirli */
+    mix-blend-mode: overlay;
+    /* Animazione lenta e continua: il glint scorre da destra a sinistra
+       senza interruzioni. Per la maggior parte del tempo la lama è fuori
+       dal logo (background-size 350% = lama larga 28% del canvas),
+       quindi il bagliore visibile dura ~2 secondi ogni ciclo da 9. */
+    animation: logoGlint 9s linear 2s infinite;
+  }
+  @keyframes logoGlint {
+    0%   { background-position: 220% 0; }
+    100% { background-position: -120% 0; }
   }
   header h1 {
     font-family: 'Cinzel', 'Inter', serif;
@@ -571,13 +618,17 @@
     mix-blend-mode: screen;
   }
   .thanks p {
+    opacity: 0;
+    animation: fadeUp 0.5s 1.3s ease-out forwards;
+    line-height: 1.3;
+  }
+  .thanks-tagline span {
+    display: block;
     font-family: 'Cinzel', 'Inter', serif;
     font-size: clamp(16px, 2.4vw, 20px);
     font-weight: 600;
     letter-spacing: 0.04em;
     text-transform: uppercase;
-    opacity: 0;
-    animation: fadeUp 0.5s 1.3s ease-out forwards;
     background: linear-gradient(
       180deg,
       #462523 0%,
@@ -596,9 +647,8 @@
       drop-shadow(0 1px 0 rgba(74, 16, 24, 0.5))
       drop-shadow(0 0 6px rgba(232, 181, 71, 0.15));
     position: relative;
-    display: inline-block;
   }
-  .thanks p::before {
+  .thanks-tagline span::before {
     content: attr(data-text);
     position: absolute;
     left: 0;
@@ -624,6 +674,10 @@
     animation: shimmer 9s cubic-bezier(0.45, 0.05, 0.55, 0.95) 6s infinite;
     pointer-events: none;
     mix-blend-mode: screen;
+  }
+  /* La seconda riga ha la lama sfasata di 1.5s rispetto alla prima */
+  .thanks-tagline span:nth-child(2)::before {
+    animation-delay: 7.5s;
   }
   @keyframes fadeUp {
     from { opacity: 0; transform: translateY(15px); }
@@ -846,7 +900,10 @@
 <div class="container" id="mainContainer">
 
   <header>
-    <img src="GranGalanzio_3D.png" alt="Gran Galanzio" class="logo">
+    <div class="logo-wrap">
+      <img src="GranGalanzio_3D.png" alt="Gran Galanzio" class="logo">
+      <div class="logo-glint"></div>
+    </div>
     <h1>Vota il <span class="accent" data-text="Gran Gol">Gran Gol</span> e la <span class="accent" data-text="Gran Parata">Gran Parata</span></h1>
   </header>
 
@@ -937,7 +994,10 @@
       <div class="pulse"></div>
     </div>
     <h2 data-text="Grazie!">Grazie!</h2>
-    <p data-text="Ci vediamo al Gran Galanzio!">Ci vediamo al Gran Galanzio!</p>
+    <p class="thanks-tagline">
+      <span data-text="Ci vediamo al">Ci vediamo al</span>
+      <span data-text="Gran Galanzio!">Gran Galanzio!</span>
+    </p>
   </div>
 
 </div>
