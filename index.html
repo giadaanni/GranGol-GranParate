@@ -69,59 +69,12 @@
     padding-bottom: 32px;
     border-bottom: 1px solid var(--border);
   }
-  header .logo-wrap {
-    position: relative;
-    display: inline-block;
+  header .logo {
+    display: block;
     margin: 0 auto 24px;
     max-width: 320px;
     width: 70%;
-    overflow: hidden;
-    /* Maschera che evita che il glint esca dal bounding box del logo */
-    -webkit-mask-image:
-      linear-gradient(black, black);
-    mask-image:
-      linear-gradient(black, black);
-  }
-  header .logo {
-    display: block;
-    width: 100%;
     height: auto;
-    position: relative;
-    z-index: 1;
-  }
-  /* Glint: lama diagonale che passa SOPRA al logo */
-  header .logo-glint {
-    position: absolute;
-    inset: 0;
-    z-index: 2;
-    pointer-events: none;
-    background-image: linear-gradient(
-      115deg,
-      transparent 0%,
-      transparent 38%,
-      rgba(255, 240, 200, 0.0) 44%,
-      rgba(255, 246, 220, 0.35) 48%,
-      rgba(255, 252, 240, 0.7) 50%,
-      rgba(255, 246, 220, 0.35) 52%,
-      rgba(255, 240, 200, 0.0) 56%,
-      transparent 62%,
-      transparent 100%
-    );
-    background-size: 350% 100%;
-    background-repeat: no-repeat;
-    background-position: 200% 0;
-    /* Overlay: la lama dorata interagisce con i colori dell'immagine
-       sotto, esaltando i riflessi metallici invece di coprirli */
-    mix-blend-mode: overlay;
-    /* Animazione lenta e continua: il glint scorre da destra a sinistra
-       senza interruzioni. Per la maggior parte del tempo la lama è fuori
-       dal logo (background-size 350% = lama larga 28% del canvas),
-       quindi il bagliore visibile dura ~2 secondi ogni ciclo da 9. */
-    animation: logoGlint 9s linear 2s infinite;
-  }
-  @keyframes logoGlint {
-    0%   { background-position: 220% 0; }
-    100% { background-position: -120% 0; }
   }
   header h1 {
     font-family: 'Cinzel', 'Inter', serif;
@@ -492,6 +445,100 @@
     margin-right: 8px;
   }
   @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ========== Pulsanti rapidi sotto i video ========== */
+  .quick-vote {
+    margin: 20px 0 24px;
+    padding: 16px 18px;
+    background: var(--bg-panel-light);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+  }
+  .quick-vote-label {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-bottom: 12px;
+    text-align: center;
+    font-style: italic;
+  }
+  .quick-vote-buttons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    justify-content: center;
+  }
+  .quick-vote-btn {
+    flex: 1 1 auto;
+    min-width: 80px;
+    max-width: 130px;
+    background: var(--bg-panel);
+    color: var(--text);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 10px 8px;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all .15s;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    line-height: 1.2;
+  }
+  .quick-vote-btn .qv-pos {
+    color: var(--oro);
+    font-size: 16px;
+    font-weight: 800;
+  }
+  .quick-vote-btn .qv-pts {
+    color: var(--text-muted);
+    font-size: 10px;
+    font-weight: 500;
+  }
+  .quick-vote-btn .qv-code {
+    color: var(--oro-light);
+    font-size: 11px;
+    font-weight: 700;
+    font-family: monospace;
+    background: var(--granata-dark);
+    padding: 2px 6px;
+    border-radius: 4px;
+    margin-top: 2px;
+  }
+  .quick-vote-btn:hover:not(.assigned) {
+    background: var(--granata-deep);
+    border-color: var(--border-active);
+    transform: translateY(-2px);
+  }
+  .quick-vote-btn.assigned {
+    background: var(--granata-deep);
+    border-color: var(--oro-dim);
+    cursor: pointer;
+    opacity: 0.7;
+  }
+  .quick-vote-btn.assigned:hover {
+    opacity: 0.9;
+  }
+
+  /* Messaggio dentro l'overlay quick-vote */
+  .confirm-card .quick-msg {
+    color: var(--text);
+    font-size: 14px;
+    line-height: 1.55;
+    text-align: center;
+    margin: 0 0 22px;
+    padding: 16px 14px;
+    background: var(--bg-panel-light);
+    border-radius: 8px;
+  }
+  .confirm-card .quick-msg .hl {
+    color: var(--oro);
+    font-weight: 700;
+    font-family: monospace;
+    font-size: 15px;
+  }
 
   /* ========== Schermata di ringraziamento ========== */
   .thanks {
@@ -874,6 +921,18 @@
   </div>
 </div>
 
+<!-- Overlay conferma quick-vote (assegnazione codice da pulsante rapido) -->
+<div class="confirm-overlay" id="quickVoteOverlay">
+  <div class="confirm-card">
+    <h3 id="quickVoteTitle">Conferma assegnazione</h3>
+    <p id="quickVoteMessage" class="quick-msg">—</p>
+    <div class="confirm-actions">
+      <button class="btn-secondary" id="quickVoteCancel">Annulla</button>
+      <button class="btn-primary" id="quickVoteConfirm">Conferma</button>
+    </div>
+  </div>
+</div>
+
 <!-- Overlay conferma submit -->
 <div class="confirm-overlay" id="confirmOverlay">
   <div class="confirm-card">
@@ -900,10 +959,7 @@
 <div class="container" id="mainContainer">
 
   <header>
-    <div class="logo-wrap">
-      <img src="GranGalanzio_3D.png" alt="Gran Galanzio" class="logo">
-      <div class="logo-glint"></div>
-    </div>
+    <img src="GranGalanzio_3D.png" alt="Gran Galanzio" class="logo">
     <h1>Vota il <span class="accent" data-text="Gran Gol">Gran Gol</span> e la <span class="accent" data-text="Gran Parata">Gran Parata</span></h1>
   </header>
 
@@ -922,6 +978,11 @@
           allowfullscreen></iframe>
       </div>
       <div class="video-hint">Doppio click sul video per metterlo a schermo intero</div>
+
+      <div class="quick-vote">
+        <div class="quick-vote-label">Mentre guardi, assegna al volo il gol attuale a:</div>
+        <div class="quick-vote-buttons" id="goalQuickButtons"></div>
+      </div>
 
       <div id="goalRanking"></div>
 
@@ -949,6 +1010,11 @@
           allowfullscreen></iframe>
       </div>
       <div class="video-hint">Doppio click sul video per metterlo a schermo intero</div>
+
+      <div class="quick-vote">
+        <div class="quick-vote-label">Mentre guardi, assegna al volo la parata attuale a:</div>
+        <div class="quick-vote-buttons" id="saveQuickButtons"></div>
+      </div>
 
       <div id="saveRanking"></div>
 
@@ -1191,6 +1257,237 @@
   buildRanking("saveRanking", saveCodes, "save", NUM_SAVE_PICKS, SAVE_POINTS);
 
   // ============================================================
+  // Pulsanti rapidi di voto sotto al video
+  // ============================================================
+  function buildQuickButtons(containerId, group, numPicks, pointsArr) {
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+    for (let i = 0; i < numPicks; i++) {
+      const btn = document.createElement("button");
+      btn.type = "button";
+      btn.className = "quick-vote-btn";
+      btn.dataset.group = group;
+      btn.dataset.position = i;
+      btn.innerHTML =
+        '<span class="qv-pos">' + POSITION_LABELS[i] + '</span>' +
+        '<span class="qv-pts">' + pointsArr[i] + ' pt</span>';
+      btn.addEventListener("click", () => handleQuickVote(group, i));
+      container.appendChild(btn);
+    }
+  }
+  buildQuickButtons("goalQuickButtons", "goal", NUM_GOAL_PICKS, GOAL_POINTS);
+  buildQuickButtons("saveQuickButtons", "saveQuickButtons", NUM_SAVE_PICKS, SAVE_POINTS);
+  // Fix: il group corretto per le parate è "save", non "saveQuickButtons"
+  document.querySelectorAll('#saveQuickButtons .quick-vote-btn').forEach(b => b.dataset.group = "save");
+
+  // Aggiorna lo stato visuale dei pulsanti rapidi in base ai dropdown
+  function refreshQuickButtons() {
+    document.querySelectorAll('.quick-vote-btn').forEach(btn => {
+      const group = btn.dataset.group;
+      const pos = parseInt(btn.dataset.position, 10);
+      const select = document.querySelector('select[name="' + group + '_' + (pos + 1) + '"]');
+      const codeBadge = btn.querySelector('.qv-code');
+      if (select && select.value) {
+        btn.classList.add('assigned');
+        if (!codeBadge) {
+          const badge = document.createElement('span');
+          badge.className = 'qv-code';
+          badge.textContent = select.value;
+          btn.appendChild(badge);
+        } else {
+          codeBadge.textContent = select.value;
+        }
+      } else {
+        btn.classList.remove('assigned');
+        if (codeBadge) codeBadge.remove();
+      }
+    });
+  }
+
+  // Dato un timestamp in secondi e una mappa codice→timestamp di inizio,
+  // restituisce il codice "corrente" (quello la cui clip è in onda in quel momento)
+  function findCurrentCode(currentTime, timestampMap, codes) {
+    // Filtro solo i codici che hanno un timestamp definito
+    const sorted = codes
+      .filter(c => timestampMap[c] !== undefined && timestampMap[c] !== null)
+      .map(c => ({ code: c, ts: timestampMap[c] }))
+      .sort((a, b) => a.ts - b.ts);
+
+    if (sorted.length === 0) return null;
+    // Se siamo prima dell'inizio della prima clip → null (intro)
+    if (currentTime < sorted[0].ts) return null;
+
+    // Trovo il più alto timestamp ≤ currentTime
+    let current = sorted[0];
+    for (const item of sorted) {
+      if (item.ts <= currentTime) current = item;
+      else break;
+    }
+    return current.code;
+  }
+
+  // Stato dell'overlay quick-vote in attesa di conferma
+  let pendingQuickVote = null;
+
+  function handleQuickVote(group, position) {
+    const player = group === "goal" ? goalPlayer : savePlayer;
+    const timestampMap = group === "goal" ? GOAL_TIMESTAMPS : SAVE_TIMESTAMPS;
+    const codes = group === "goal" ? goalCodes : saveCodes;
+    const itemLabel = group === "goal" ? "gol" : "parata";
+
+    // Verifico che il player sia pronto
+    if (!player || typeof player.getCurrentTime !== "function") {
+      showQuickPopup({
+        title: "Video non pronto",
+        messageHtml: "Aspetta qualche secondo che il video si carichi e riprova.",
+        confirmText: "Ho capito",
+        hideCancel: true
+      });
+      return;
+    }
+
+    // Metto in pausa il video
+    try { player.pauseVideo(); } catch (e) {}
+
+    // Leggo il tempo corrente
+    const t = player.getCurrentTime();
+    const currentCode = findCurrentCode(t, timestampMap, codes);
+
+    // Caso 1: siamo nell'intro, prima del primo codice
+    if (currentCode === null) {
+      showQuickPopup({
+        title: "Sei sull'intro",
+        messageHtml: "Sei prima dell'inizio della prima clip. Aspetta che parta il primo " + itemLabel + " prima di assegnare.",
+        confirmText: "Ho capito",
+        hideCancel: true,
+        onConfirm: () => { try { player.playVideo(); } catch(e) {} }
+      });
+      return;
+    }
+
+    // Controllo se la posizione era già assegnata
+    const targetSelect = document.querySelector('select[name="' + group + '_' + (position + 1) + '"]');
+    const existingCodeAtPos = targetSelect ? targetSelect.value : "";
+
+    // Controllo se questo codice è già presente in un'altra posizione dello stesso gruppo
+    const otherSelects = Array.from(document.querySelectorAll('select[data-group="' + group + '"]'));
+    let codeAlreadyAt = -1;
+    otherSelects.forEach((s, idx) => {
+      if (s.value === currentCode && idx !== position) codeAlreadyAt = idx;
+    });
+
+    // Costruisco messaggio in base ai casi
+    let title, msg;
+
+    if (existingCodeAtPos === currentCode) {
+      // Stesso codice già nella stessa posizione: niente da fare
+      showQuickPopup({
+        title: "Già assegnato",
+        messageHtml: 'Il ' + itemLabel + ' <span class="hl">' + currentCode + '</span> è già al ' + POSITION_LABELS[position] + ' posto.',
+        confirmText: "Ho capito",
+        hideCancel: true,
+        onConfirm: () => { try { player.playVideo(); } catch(e) {} }
+      });
+      return;
+    }
+
+    if (existingCodeAtPos && codeAlreadyAt >= 0) {
+      // Posizione già occupata E codice già presente altrove → scambio
+      title = "Scambio posizioni";
+      msg = 'Vuoi <strong>scambiare</strong>?<br><br>' +
+            '<span class="hl">' + currentCode + '</span> sta al ' + POSITION_LABELS[codeAlreadyAt] +
+            ' posto, mentre il ' + POSITION_LABELS[position] +
+            ' posto ha <span class="hl">' + existingCodeAtPos + '</span>.<br>' +
+            'Confermando, i due codici si scambieranno.';
+    } else if (existingCodeAtPos) {
+      // Solo la posizione è occupata
+      title = "Posizione già assegnata";
+      msg = 'Il ' + POSITION_LABELS[position] + ' posto era già assegnato a <span class="hl">' + existingCodeAtPos + '</span>.<br><br>' +
+            'Vuoi sostituirlo con <span class="hl">' + currentCode + '</span>?';
+    } else if (codeAlreadyAt >= 0) {
+      // Solo il codice era già altrove
+      title = "Sposto il codice";
+      msg = '<span class="hl">' + currentCode + '</span> era già al ' + POSITION_LABELS[codeAlreadyAt] + ' posto.<br><br>' +
+            'Vuoi spostarlo al ' + POSITION_LABELS[position] + ' posto?';
+    } else {
+      // Caso normale: niente conflitti
+      title = "Conferma assegnazione";
+      msg = 'Assegnare il ' + itemLabel + ' <span class="hl">' + currentCode + '</span> al ' +
+            '<strong>' + POSITION_LABELS[position] + ' posto</strong>?';
+    }
+
+    showQuickPopup({
+      title: title,
+      messageHtml: msg,
+      confirmText: "Conferma",
+      onConfirm: () => {
+        assignCode(group, position, currentCode, codeAlreadyAt, existingCodeAtPos);
+        try { player.playVideo(); } catch(e) {}
+      },
+      onCancel: () => {
+        try { player.playVideo(); } catch(e) {}
+      }
+    });
+  }
+
+  function assignCode(group, position, newCode, codeAlreadyAt, existingCodeAtPos) {
+    const targetSelect = document.querySelector('select[name="' + group + '_' + (position + 1) + '"]');
+    if (!targetSelect) return;
+
+    // Caso scambio: codice già in un'altra posizione E la posizione target era occupata
+    if (codeAlreadyAt >= 0 && existingCodeAtPos) {
+      const otherSelect = document.querySelector('select[name="' + group + '_' + (codeAlreadyAt + 1) + '"]');
+      if (otherSelect) otherSelect.value = existingCodeAtPos;
+      targetSelect.value = newCode;
+    }
+    // Codice già altrove ma posizione target vuota: sposto (libero la vecchia posizione)
+    else if (codeAlreadyAt >= 0) {
+      const otherSelect = document.querySelector('select[name="' + group + '_' + (codeAlreadyAt + 1) + '"]');
+      if (otherSelect) otherSelect.value = "";
+      targetSelect.value = newCode;
+    }
+    // Caso normale (e caso "posizione occupata da altro codice"): assegno e basta
+    else {
+      targetSelect.value = newCode;
+    }
+
+    refreshGroup(group);
+    updateProgress();
+    saveDraft();
+    refreshQuickButtons();
+  }
+
+  // Mostra l'overlay quick-vote con messaggio personalizzato
+  const quickOverlay = document.getElementById("quickVoteOverlay");
+  const quickTitle = document.getElementById("quickVoteTitle");
+  const quickMessage = document.getElementById("quickVoteMessage");
+  const quickConfirmBtn = document.getElementById("quickVoteConfirm");
+  const quickCancelBtn = document.getElementById("quickVoteCancel");
+
+  function showQuickPopup({ title, messageHtml, confirmText, hideCancel, onConfirm, onCancel }) {
+    quickTitle.textContent = title;
+    quickMessage.innerHTML = messageHtml;
+    quickConfirmBtn.textContent = confirmText || "Conferma";
+    quickCancelBtn.style.display = hideCancel ? "none" : "";
+    pendingQuickVote = { onConfirm, onCancel };
+    quickOverlay.classList.add("active");
+  }
+  function closeQuickPopup() {
+    quickOverlay.classList.remove("active");
+    pendingQuickVote = null;
+  }
+  quickConfirmBtn.addEventListener("click", () => {
+    const cb = pendingQuickVote ? pendingQuickVote.onConfirm : null;
+    closeQuickPopup();
+    if (cb) cb();
+  });
+  quickCancelBtn.addEventListener("click", () => {
+    const cb = pendingQuickVote ? pendingQuickVote.onCancel : null;
+    closeQuickPopup();
+    if (cb) cb();
+  });
+
+  // ============================================================
   // Contatore X/5
   // ============================================================
   function updateProgress() {
@@ -1203,6 +1500,9 @@
     document.getElementById("saveCount").textContent = saveDone;
     document.getElementById("goalProgress").classList.toggle("complete", goalDone === NUM_GOAL_PICKS);
     document.getElementById("saveProgress").classList.toggle("complete", saveDone === NUM_SAVE_PICKS);
+
+    // Sincronizzo lo stato dei pulsanti rapidi con i dropdown
+    refreshQuickButtons();
   }
 
   // ============================================================
