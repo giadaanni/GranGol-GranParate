@@ -710,7 +710,7 @@
     <!-- SEZIONE PARATE -->
     <div class="section">
       <h2><span class="num">2</span>Gran Parata</h2>
-      <div class="sub">Guarda il video e ordina le 5 parate che ti sono piaciute di più.</div>
+      <div class="sub">Guarda il video e ordina le 3 parate che ti sono piaciute di più.</div>
 
       <div class="video-wrap">
         <iframe id="saveVideo"
@@ -730,7 +730,7 @@
 
       <div class="progress" id="saveProgress">
         <span class="label">Parate selezionate</span>
-        <span class="count"><span id="saveCount">0</span>/5</span>
+        <span class="count"><span id="saveCount">0</span>/3</span>
       </div>
     </div>
 
@@ -785,7 +785,7 @@
   const GOAL_VIDEO_ID = "uH-u-xptkwE";
   const SAVE_VIDEO_ID = "ydHUvbwxq08";
   const NUM_GOALS = 25;
-  const NUM_SAVES = 25;
+  const NUM_SAVES = 10;
 
   // Timestamp per ogni codice. Compila i secondi (es. 12 → 0:12, 75 → 1:15).
   // Lascia null se non lo sai: quel codice non avrà il link al tempo.
@@ -802,9 +802,12 @@
   };
 
   // ============================================================
-  // Sistema punti — 5/4/3/2/1 (Borda)
+  // Sistemi punti: gol 5/4/3/2/1, parate 3/2/1
   // ============================================================
-  const POINTS = [5, 4, 3, 2, 1];
+  const GOAL_POINTS = [5, 4, 3, 2, 1];
+  const SAVE_POINTS = [3, 2, 1];
+  const NUM_GOAL_PICKS = 5;
+  const NUM_SAVE_PICKS = 3;
   const POSITION_LABELS = ["1°", "2°", "3°", "4°", "5°"];
   const LS_KEY = "gran_galanzio_draft_v1";
 
@@ -855,10 +858,10 @@
   // ============================================================
   // Costruzione dropdown
   // ============================================================
-  function buildRanking(containerId, codes, namePrefix) {
+  function buildRanking(containerId, codes, namePrefix, numPicks, pointsArr) {
     const container = document.getElementById(containerId);
     container.innerHTML = "";
-    for (let i = 0; i < 5; i++) {
+    for (let i = 0; i < numPicks; i++) {
       const row = document.createElement("div");
       row.className = "rank-row";
 
@@ -866,7 +869,7 @@
       labelDiv.className = "rank-label";
       labelDiv.innerHTML =
         '<span class="position">' + POSITION_LABELS[i] + '</span>' +
-        '<span class="points">' + POINTS[i] + ' pt</span>';
+        '<span class="points">' + pointsArr[i] + ' pt</span>';
 
       const fieldDiv = document.createElement("div");
       fieldDiv.className = "field";
@@ -915,8 +918,8 @@
     });
   }
 
-  buildRanking("goalRanking", goalCodes, "goal");
-  buildRanking("saveRanking", saveCodes, "save");
+  buildRanking("goalRanking", goalCodes, "goal", NUM_GOAL_PICKS, GOAL_POINTS);
+  buildRanking("saveRanking", saveCodes, "save", NUM_SAVE_PICKS, SAVE_POINTS);
 
   // ============================================================
   // Contatore X/5
@@ -929,8 +932,8 @@
 
     document.getElementById("goalCount").textContent = goalDone;
     document.getElementById("saveCount").textContent = saveDone;
-    document.getElementById("goalProgress").classList.toggle("complete", goalDone === 5);
-    document.getElementById("saveProgress").classList.toggle("complete", saveDone === 5);
+    document.getElementById("goalProgress").classList.toggle("complete", goalDone === NUM_GOAL_PICKS);
+    document.getElementById("saveProgress").classList.toggle("complete", saveDone === NUM_SAVE_PICKS);
   }
 
   // ============================================================
@@ -1007,7 +1010,7 @@
     const saveValues = Array.from(document.querySelectorAll('select[data-group="save"]')).map(s => s.value);
 
     if (goalValues.some(v => !v) || saveValues.some(v => !v)) {
-      showStatus("Devi scegliere tutte e 5 le posizioni in entrambe le classifiche.", "error");
+      showStatus("Devi scegliere tutte le posizioni (5 per i gol, 3 per le parate).", "error");
       return;
     }
 
